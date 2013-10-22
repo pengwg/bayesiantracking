@@ -27,11 +27,11 @@ CKFTracking::~CKFTracking()
 }
 
 
-void  CKFTracking::doProcess( double DeltaTime, double observationRange, double observationBearing )
+void  CKFTracking::doProcess( double DeltaTime, double observationX, double observationY)
 {
     m_deltaTime = (float)DeltaTime;
-    m_obsBearing = (float)observationBearing;
-    m_obsRange = (float) observationRange;
+    m_obsX = (float)observationX;
+    m_obsY = (float)observationY;
 
     runOneKalmanIteration();
 }
@@ -71,8 +71,7 @@ void CKFTracking::OnTransitionNoise(KFMatrix_VxV &Q) const
 
 void CKFTracking::OnGetObservationNoise(KFMatrix_OxO &R) const
 {
-    R(0,0) = square( BEARING_SENSOR_NOISE_STD );
-    R(1,1) = square( RANGE_SENSOR_NOISE_STD );
+    R(0,0) = R(1,1) = square( SENSOR_NOISE_STD );
 }
 
 void CKFTracking::OnGetObservationsAndDataAssociation(
@@ -85,8 +84,8 @@ void CKFTracking::OnGetObservationsAndDataAssociation(
         )
 {
     out_z.resize(1);
-    out_z[0][0] = m_obsBearing;
-    out_z[0][1] = m_obsRange;
+    out_z[0][0] = m_obsX;
+    out_z[0][1] = m_obsY;
 
     out_data_association.clear(); // Not used
 }
@@ -97,17 +96,9 @@ void CKFTracking::OnObservationModel(
         vector_KFArray_OBS	&out_predictions
         ) const
 {
-    // predicted bearing:
-    kftype x = m_xkk[0];
-    kftype y = m_xkk[1];
-
-    kftype h_bear = atan2(y,x);
-    kftype h_range = sqrt(square(x)+square(y));
-
-    // idx_landmarks_to_predict is ignored in NON-SLAM problems
     out_predictions.resize(1);
-    out_predictions[0][0] = h_bear;
-    out_predictions[0][1] = h_range;
+    out_predictions[0][0] = m_xkk[0];
+    out_predictions[0][1] = m_xkk[1];
 }
 
 
@@ -117,23 +108,17 @@ void CKFTracking::OnObservationJacobians(
         KFMatrix_OxF &Hy
         ) const
 {
-    // predicted bearing:
-    kftype x = m_xkk[0];
-    kftype y = m_xkk[1];
-
     Hx.zeros();
-    Hx(0,0) = -y/(square(x)+square(y));
-    Hx(0,1) = 1/(x*(1+square(y/x)));
-
-    Hx(1,0) = x/sqrt(square(x)+square(y));
-    Hx(1,1) = y/sqrt(square(x)+square(y));
+    Hx(0,0) = 1;
+    Hx(1,1) = 1;
 
     // Hy: Not used
 }
 
+/*
 void CKFTracking::OnSubstractObservationVectors(KFArray_OBS &A, const KFArray_OBS &B) const
 {
     A -= B;
     math::wrapToPiInPlace(A[0]); // The angular component
-}
+}*/
 

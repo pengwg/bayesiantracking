@@ -2,8 +2,7 @@
 
 using namespace mrpt::bayes;
 
-#define BEARING_SENSOR_NOISE_STD 	DEG2RAD(15.0f)
-#define RANGE_SENSOR_NOISE_STD 		0.3f
+#define SENSOR_NOISE_STD 		0.3f
 #define DELTA_TIME                  	0.1f
 
 #define VEHICLE_INITIAL_X			4.0f
@@ -22,7 +21,7 @@ public:
     CKFTracking( );
     virtual ~CKFTracking();
 
-    void  doProcess( double DeltaTime, double observationRange, double observationBearing );
+    void  doProcess(double DeltaTime, double observationX, double observationY );
 
     void getState( KFVector &xkk, KFMatrix &pkk)
     {
@@ -32,7 +31,7 @@ public:
 
 protected:
 
-    float m_obsBearing,m_obsRange;
+    float m_obsX, m_obsY;
     float m_deltaTime;
 
     void OnGetAction( KFArray_ACT &out_u ) const;
@@ -70,6 +69,6 @@ protected:
             KFMatrix_OxF &Hy
             ) const;
 
-    void OnSubstractObservationVectors(KFArray_OBS &A, const KFArray_OBS &B) const;
+    // void OnSubstractObservationVectors(KFArray_OBS &A, const KFArray_OBS &B) const;
 };
 

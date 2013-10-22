@@ -46,22 +46,17 @@ void TestBayesianTracking()
         v+=1.0f*DELTA_TIME*cos(t);
         w-=0.1f*DELTA_TIME*sin(t);
         
-        
         // Simulate noisy observation:
         float realBearing = atan2( y,x );
-        float obsBearing = realBearing  + BEARING_SENSOR_NOISE_STD * randomGenerator.drawGaussian1D_normalized();
+        float obsBearing = realBearing  + SENSOR_NOISE_STD * randomGenerator.drawGaussian1D_normalized();
         printf("Real/Simulated bearing: %.03f / %.03f deg\n", RAD2DEG(realBearing), RAD2DEG(obsBearing) );
         
         float realRange = sqrt(square(x)+square(y));
-        float obsRange = max(0.0, realRange  + RANGE_SENSOR_NOISE_STD * randomGenerator.drawGaussian1D_normalized() );
+        float obsRange = max(0.0, realRange  + SENSOR_NOISE_STD * randomGenerator.drawGaussian1D_normalized() );
         printf("Real/Simulated range: %.03f / %.03f \n", realRange, obsRange );
         
         // Process with EKF:
         EKF.doProcess(DELTA_TIME,obsRange, obsBearing);
-        
-        EKF.getProfiler().enter("PF:complete_step");
-
-        EKF.getProfiler().leave("PF:complete_step");
         
         // Show EKF state:
         CKFTracking::KFVector EKF_xkk;
