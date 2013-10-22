@@ -8,6 +8,7 @@ endif(COMMAND cmake_policy)
 FIND_PACKAGE(MRPT REQUIRED base;bayes;gui)
 
 ADD_EXECUTABLE(bayesiantracking
+    TemplateInst.cpp
     test.cpp
     KFTracking.cpp
     )

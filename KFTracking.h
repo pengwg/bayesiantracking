@@ -14,11 +14,9 @@ using namespace mrpt::bayes;
 #define TRANSITION_MODEL_STD_XY 	0.03f
 #define TRANSITION_MODEL_STD_VXY 	0.20f
 
-#define NUM_PARTICLES				2000
+extern template class CKalmanFilterCapable<4, 2, 0, 1>;
 
-
-class CKFTracking :
-        public mrpt::bayes::CKalmanFilterCapable<4, 2, 0, 1>
+class CKFTracking : public CKalmanFilterCapable<4, 2, 0, 1>
 {
 public:
     CKFTracking( );
