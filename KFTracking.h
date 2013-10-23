@@ -3,12 +3,8 @@
 using namespace mrpt::bayes;
 
 #define SENSOR_NOISE_STD 		0.3f
-#define DELTA_TIME                  	0.1f
 
-#define VEHICLE_INITIAL_X			4.0f
-#define VEHICLE_INITIAL_Y			4.0f
-#define VEHICLE_INITIAL_V           1.0f
-#define VEHICLE_INITIAL_W           DEG2RAD(20.0f)
+#define VEHICLE_INITIAL_V           10.0f
 
 #define TRANSITION_MODEL_STD_XY 	0.03f
 #define TRANSITION_MODEL_STD_VXY 	0.20f
@@ -18,7 +14,7 @@ extern template class CKalmanFilterCapable<4, 2, 0, 1>;
 class CKFTracking : public CKalmanFilterCapable<4, 2, 0, 1>
 {
 public:
-    CKFTracking( );
+    CKFTracking(float x0, float y0);
     virtual ~CKFTracking();
 
     void  doProcess(double DeltaTime, double observationX, double observationY );

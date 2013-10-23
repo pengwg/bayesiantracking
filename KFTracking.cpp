@@ -1,14 +1,14 @@
 #include "KFTracking.h"
 
-CKFTracking::CKFTracking()
+CKFTracking::CKFTracking(float x0, float y0)
 {
     //KF_options.method = kfEKFNaive;
     KF_options.method = kfEKFAlaDavison;
 
     // INIT KF STATE
     m_xkk.resize(4,0);	// State: (x,y,heading,v,w)
-    m_xkk[0]= VEHICLE_INITIAL_X;
-    m_xkk[1]= VEHICLE_INITIAL_Y;
+    m_xkk[0]= x0;
+    m_xkk[1]= y0;
     m_xkk[2]=-VEHICLE_INITIAL_V;
     m_xkk[3]=0;
 
