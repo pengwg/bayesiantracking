@@ -36,7 +36,7 @@ void TestBayesianTracking()
     QDateTime t = getRecordTime(trackFile, x, y, z);
 
     CKFTracking	EKF(x, z);
-    EKF.KF_options.method = kfEKFNaive;
+    //EKF.KF_options.method = kfEKFNaive;
     
     EKF.KF_options.verbose = true;
     EKF.KF_options.enable_profiler = true;

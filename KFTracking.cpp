@@ -2,7 +2,7 @@
 
 CKFTracking::CKFTracking(float x0, float y0)
 {
-    //KF_options.method = kfEKFNaive;
+    // KF_options.method = kfEKFNaive;
     KF_options.method = kfEKFAlaDavison;
 
     // INIT KF STATE

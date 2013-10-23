@@ -6,8 +6,8 @@ using namespace mrpt::bayes;
 
 #define VEHICLE_INITIAL_V           10.0f
 
-#define TRANSITION_MODEL_STD_XY 	0.03f
-#define TRANSITION_MODEL_STD_VXY 	0.20f
+#define TRANSITION_MODEL_STD_XY 	0.3f
+#define TRANSITION_MODEL_STD_VXY 	0.6f
 
 extern template class CKalmanFilterCapable<4, 2, 0, 1>;
 
