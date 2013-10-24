@@ -76,12 +76,16 @@ void TestBayesianTracking()
         cout << "EKF: " << EKF_xkk << endl;
         
         // Draw EKF state:
-        CKFTracking::KFMatrix   COVXY(2,2);
-        COVXY(0,0) = EKF_pkk(0,0);
-        COVXY(1,1) = EKF_pkk(1,1);
-        COVXY(0,1) = COVXY(1,0) = EKF_pkk(0,1);
-        
-        winEKF.plotEllipse( EKF_xkk[0], EKF_xkk[1], COVXY, 3, "b-2", "ellipse_EKF" );
+        float theta = EKF_xkk[0];
+        float r = EKF_xkk[2];
+        float x0 = EKF_xkk[3];
+        float y0 = EKF_xkk[4];
+
+        float x1 = x0 + r * cosf(theta);
+        float y1 = y0 + r * sinf(theta);
+
+        winEKF.plot(vector_float(1, x1), vector_float(1, y1), "b.8", "EKF Estimate" );
+
         
         // Save GT vs EKF state:
 #ifdef SAVE_GT_LOGS
@@ -94,10 +98,10 @@ void TestBayesianTracking()
 #endif
         
         // Draw the velocity vector:
-        vector_float vx(2), vz(2);
-        vx[0] = EKF_xkk[0];  vx[1] = vx[0] + EKF_xkk[2] * 1;
-        vz[0] = EKF_xkk[1];  vz[1] = vz[0] + EKF_xkk[3] * 1;
-        winEKF.plot( vx, vz, "g-4", "velocityEKF" );
+        vector_float rx(2), ry(2);
+        rx[0] = x0;  rx[1] = x1;
+        ry[0] = y0;  ry[1] = y1;
+        winEKF.plot( rx, ry, "g-4", "R" );
         
         // Draw GT:
         winEKF.plot( vector_float(1,x), vector_float(1,z),"k.8","plot_GT");

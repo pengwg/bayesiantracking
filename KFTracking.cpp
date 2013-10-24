@@ -6,19 +6,18 @@ CKFTracking::CKFTracking(float x0, float y0)
     KF_options.method = kfEKFAlaDavison;
 
     // INIT KF STATE
-    m_xkk.resize(4,0);	// State: (x,y,heading,v,w)
-    m_xkk[0]= x0;
-    m_xkk[1]= y0;
-    m_xkk[2]=-VEHICLE_INITIAL_V;
-    m_xkk[3]=0;
+    m_xkk.resize(5,0);	// State: (theta, omega, r, x0, y0)
+    m_xkk[3] = x0;
+    m_xkk[4] = y0;
 
     // Initial cov:  Large uncertainty
-    m_pkk.setSize(4,4);
+    m_pkk.setSize(5,5);
     m_pkk.unit();
     m_pkk(0,0)=
             m_pkk(1,1)= square( 5.0f );
     m_pkk(2,2)=
-            m_pkk(3,3)= square( 1.0f );
+            m_pkk(3,3)= square( 5.0f );
+    m_pkk(4,4) = square( 5.0f );
 }
 
 CKFTracking::~CKFTracking()
@@ -50,23 +49,20 @@ void CKFTracking::OnTransitionModel(
 {
     // in_u[0] : Delta time
     // in_out_x: [0]:x  [1]:y  [2]:vx  [3]: vy
-    inout_x[0] += in_u[0] * inout_x[2];
-    inout_x[1] += in_u[0] * inout_x[3];
-
+    inout_x[0] += in_u[0] * inout_x[1];
 }
 
 void CKFTracking::OnTransitionJacobian(KFMatrix_VxV  &F) const
 {
     F.unit();
 
-    F(0,2) = m_deltaTime;
-    F(1,3) = m_deltaTime;
+    F(0,1) = m_deltaTime;
 }
 
 void CKFTracking::OnTransitionNoise(KFMatrix_VxV &Q) const
 {
-    Q(0,0) = Q(1,1) = square( TRANSITION_MODEL_STD_XY );
-    Q(2,2) = Q(3,3) = square( TRANSITION_MODEL_STD_VXY );
+    Q(0,0) = Q(1,1) = Q(4,4) =
+    Q(2,2) = Q(3,3) = square( TRANSITION_MODEL_STD_XY );
 }
 
 void CKFTracking::OnGetObservationNoise(KFMatrix_OxO &R) const
@@ -97,8 +93,8 @@ void CKFTracking::OnObservationModel(
         ) const
 {
     out_predictions.resize(1);
-    out_predictions[0][0] = m_xkk[0];
-    out_predictions[0][1] = m_xkk[1];
+    out_predictions[0][0] = m_xkk[3] + m_xkk[2] * cosf(m_xkk[0]);
+    out_predictions[0][1] = m_xkk[4] + m_xkk[2] * sinf(m_xkk[0]);;
 }
 
 
@@ -108,15 +104,22 @@ void CKFTracking::OnObservationJacobians(
         KFMatrix_OxF &Hy
         ) const
 {
-    Hx.zeros();
-    Hx(0,0) = 1;
-    Hx(1,1) = 1;
+    float theta = m_xkk[0];
+    float r = m_xkk[2];
 
+    Hx.zeros();
+    Hx(0, 0) = -r * sinf(theta);
+    Hx(0, 2) = cosf(theta);
+    Hx(0, 3) = 1;
+
+    Hx(1, 0) = r * cosf(theta);
+    Hx(1, 2) = sinf(theta);
+    Hx(1, 4) = 1;
     // Hy: Not used
 }
 
-/*
-void CKFTracking::OnSubstractObservationVectors(KFArray_OBS &A, const KFArray_OBS &B) const
+
+/*void CKFTracking::OnSubstractObservationVectors(KFArray_OBS &A, const KFArray_OBS &B) const
 {
     A -= B;
     math::wrapToPiInPlace(A[0]); // The angular component
