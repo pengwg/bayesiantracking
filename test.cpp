@@ -77,12 +77,14 @@ void TestBayesianTracking()
         
         // Draw EKF state:
         float theta = EKF_xkk[0];
-        float r = EKF_xkk[2];
-        float x0 = EKF_xkk[3];
-        float y0 = EKF_xkk[4];
+        float phi = EKF_xkk[2];
+        float a = EKF_xkk[3];
+        float b = EKF_xkk[4];
+        float xc = EKF_xkk[5];
+        float yc = EKF_xkk[6];
 
-        float x1 = x0 + r * cosf(theta);
-        float y1 = y0 + r * sinf(theta);
+        float x1 = xc + a * cosf(theta) * cosf(phi) - b * sinf(theta) * sinf(phi);
+        float y1 = yc + a * cosf(theta) * sinf(phi) + b * sinf(theta) * cosf(phi);
 
         winEKF.plot(vector_float(1, x1), vector_float(1, y1), "b.8", "EKF Estimate" );
 
@@ -99,10 +101,14 @@ void TestBayesianTracking()
         
         // Draw the velocity vector:
         vector_float rx(2), ry(2);
-        rx[0] = x0;  rx[1] = x1;
-        ry[0] = y0;  ry[1] = y1;
-        winEKF.plot( rx, ry, "g-4", "R" );
+        rx[0] = xc - a * cosf(phi);  rx[1] = xc + a * cosf(phi);
+        ry[0] = yc - a * sinf(phi);  ry[1] = yc + a * sinf(phi);
+        winEKF.plot( rx, ry, "g-4", "R1" );
         
+        rx[0] = xc + b * sinf(phi);  rx[1] = xc - b * sinf(phi);
+        ry[0] = yc - b * cosf(phi);  ry[1] = yc + b * cosf(phi);
+        winEKF.plot( rx, ry, "r-4", "R2" );
+
         // Draw GT:
         winEKF.plot( vector_float(1,x), vector_float(1,z),"k.8","plot_GT");
         

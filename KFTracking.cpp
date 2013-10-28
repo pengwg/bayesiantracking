@@ -6,18 +6,15 @@ CKFTracking::CKFTracking(float x0, float y0)
     KF_options.method = kfEKFAlaDavison;
 
     // INIT KF STATE
-    m_xkk.resize(5,0);	// State: (theta, omega, r, x0, y0)
-    m_xkk[3] = x0;
-    m_xkk[4] = y0;
+    m_xkk.resize(7,0);	// State: (theta, omega, phi, a, b, xc, yc)
+    m_xkk[5] = x0;
+    m_xkk[6] = y0;
+    m_xkk[1] = 1;
 
     // Initial cov:  Large uncertainty
-    m_pkk.setSize(5,5);
+    m_pkk.setSize(7,7);
     m_pkk.unit();
-    m_pkk(0,0)=
-            m_pkk(1,1)= square( 5.0f );
-    m_pkk(2,2)=
-            m_pkk(3,3)= square( 5.0f );
-    m_pkk(4,4) = square( 5.0f );
+    m_pkk *= square(5.0f);
 }
 
 CKFTracking::~CKFTracking()
@@ -48,7 +45,6 @@ void CKFTracking::OnTransitionModel(
         ) const
 {
     // in_u[0] : Delta time
-    // in_out_x: [0]:x  [1]:y  [2]:vx  [3]: vy
     inout_x[0] += in_u[0] * inout_x[1];
 }
 
@@ -62,7 +58,8 @@ void CKFTracking::OnTransitionJacobian(KFMatrix_VxV  &F) const
 void CKFTracking::OnTransitionNoise(KFMatrix_VxV &Q) const
 {
     Q(0,0) = Q(1,1) = Q(4,4) =
-    Q(2,2) = Q(3,3) = square( TRANSITION_MODEL_STD_XY );
+    Q(3,3) = Q(5,5) = Q(6,6) = square( TRANSITION_MODEL_STD_XY );
+    Q(2, 2) = Q(5,5) = Q(6,6) = square(0.1f);
 }
 
 void CKFTracking::OnGetObservationNoise(KFMatrix_OxO &R) const
@@ -93,8 +90,10 @@ void CKFTracking::OnObservationModel(
         ) const
 {
     out_predictions.resize(1);
-    out_predictions[0][0] = m_xkk[3] + m_xkk[2] * cosf(m_xkk[0]);
-    out_predictions[0][1] = m_xkk[4] + m_xkk[2] * sinf(m_xkk[0]);;
+    out_predictions[0][0] = m_xkk[5] + m_xkk[3] * cosf(m_xkk[0]) * cosf(m_xkk[2]);
+                            - m_xkk[4] * sinf(m_xkk[0]) * sinf(m_xkk[2]);
+    out_predictions[0][1] = m_xkk[6] + m_xkk[3] * cosf(m_xkk[0]) * sinf(m_xkk[2]);
+                            + m_xkk[4] * sinf(m_xkk[0]) * cosf(m_xkk[2]);
 }
 
 
@@ -105,16 +104,22 @@ void CKFTracking::OnObservationJacobians(
         ) const
 {
     float theta = m_xkk[0];
-    float r = m_xkk[2];
+    float phi = m_xkk[2];
+    float a = m_xkk[3];
+    float b = m_xkk[4];
 
     Hx.zeros();
-    Hx(0, 0) = -r * sinf(theta);
-    Hx(0, 2) = cosf(theta);
-    Hx(0, 3) = 1;
+    Hx(0, 0) = -a * sinf(theta) * cosf(phi) - b * cosf(theta) * sinf(phi);
+    Hx(0, 2) = -a * cosf(theta) * sinf(phi) - b * sinf(theta) * cosf(phi);
+    Hx(0, 3) = cosf(theta) * cosf(phi);
+    Hx(0, 4) = -sinf(theta) * sinf(phi);
+    Hx(0, 5) = 1;
 
-    Hx(1, 0) = r * cosf(theta);
-    Hx(1, 2) = sinf(theta);
-    Hx(1, 4) = 1;
+    Hx(1, 0) = -a * sinf(theta) * sinf(phi) + b * cosf(theta) * cosf(phi);
+    Hx(1, 2) = a * cosf(theta) * cosf(phi) - b * sinf(theta) * sinf(phi);
+    Hx(1, 3) = cosf(theta) * sinf(phi);
+    Hx(1, 4) = sinf(theta) * cosf(phi);
+    Hx(1, 6) = 1;
     // Hy: Not used
 }
 
