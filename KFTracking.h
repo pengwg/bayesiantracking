@@ -9,9 +9,9 @@ using namespace mrpt::bayes;
 #define TRANSITION_MODEL_STD_XY 	0.3f
 #define TRANSITION_MODEL_STD_VXY 	0.6f
 
-extern template class CKalmanFilterCapable<7, 2, 0, 1>;
+extern template class CKalmanFilterCapable<6, 2, 0, 1>;
 
-class CKFTracking : public CKalmanFilterCapable<7, 2, 0, 1>
+class CKFTracking : public CKalmanFilterCapable<6, 2, 0, 1>
 {
 public:
     CKFTracking(float x0, float y0);
