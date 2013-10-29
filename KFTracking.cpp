@@ -57,9 +57,9 @@ void CKFTracking::OnTransitionJacobian(KFMatrix_VxV  &F) const
 
 void CKFTracking::OnTransitionNoise(KFMatrix_VxV &Q) const
 {
-    Q(0,0) = Q(1,1) = Q(4,4) =
-    Q(3,3) = Q(2,2) = square( TRANSITION_MODEL_STD_XY );
-    Q(4,4) = Q(5,5) = square(0.1f);
+    Q(0,0) = Q(1,1) = square(TRANSITION_MODEL_STD_ANGLE);
+    Q(3,3) = Q(2,2) = square(TRANSITION_MODEL_STD_XY);
+    Q(4,4) = Q(5,5) = square(TRANSITION_MODEL_STD_XY);
 }
 
 void CKFTracking::OnGetObservationNoise(KFMatrix_OxO &R) const

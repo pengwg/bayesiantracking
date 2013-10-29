@@ -2,12 +2,10 @@
 
 using namespace mrpt::bayes;
 
-#define SENSOR_NOISE_STD 		0.3f
+#define SENSOR_NOISE_STD 		0.5f
 
-#define VEHICLE_INITIAL_V           10.0f
-
-#define TRANSITION_MODEL_STD_XY 	0.3f
-#define TRANSITION_MODEL_STD_VXY 	0.6f
+#define TRANSITION_MODEL_STD_XY 	1.0f
+#define TRANSITION_MODEL_STD_ANGLE 	0.3f
 
 extern template class CKalmanFilterCapable<6, 2, 0, 1>;
 
